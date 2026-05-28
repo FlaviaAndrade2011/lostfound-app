@@ -1,0 +1,13 @@
+<div class="card">
+  <div class="card-body">
+    <h2>Login do ADM</h2>
+    <div *ngIf="errorMessage" class="alert">{{ errorMessage }}</div>
+    <label>Usuário</label>
+    <input [(ngModel)]="username" placeholder="Admin" />
+
+    <label>Senha</label>
+    <input [(ngModel)]="password" type="password" placeholder="Senha" />
+
+    <button class="button-primary" (click)="submit()">Entrar</button>
+  </div>
+</div>

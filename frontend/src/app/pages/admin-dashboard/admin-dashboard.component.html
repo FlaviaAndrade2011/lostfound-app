@@ -1,0 +1,84 @@
+<div class="dashboard-grid">
+  <section class="card form-card">
+    <div class="card-body">
+      <div class="dashboard-header">
+        <div>
+          <p class="eyebrow">Painel de Administração</p>
+          <h2>{{ editingId ? 'Editar item' : 'Gerenciar itens' }}</h2>
+        </div>
+        <button class="button-secondary" (click)="logout()">Sair</button>
+      </div>
+
+      <div *ngIf="message" class="alert">{{ message }}</div>
+
+      <ng-container *ngIf="!editingId">
+        <label>Título do item</label>
+        <input [(ngModel)]="title" placeholder="Ex: Carteira preta" />
+
+        <label>Descrição</label>
+        <textarea [(ngModel)]="description" rows="4" placeholder="Ex: carteira com documentos"></textarea>
+
+        <label>Local</label>
+        <input [(ngModel)]="location" placeholder="Ex: praça central" />
+
+        <label>Data</label>
+        <input [(ngModel)]="dateLost" type="date" />
+
+        <label>Foto do item</label>
+        <input type="file" (change)="selectFile($event)" />
+
+        <button class="button-primary" (click)="submit()">Enviar item perdido</button>
+      </ng-container>
+
+      <ng-container *ngIf="editingId">
+        <label>Título do item</label>
+        <input [(ngModel)]="editTitle" placeholder="Ex: Carteira preta" />
+
+        <label>Descrição</label>
+        <textarea [(ngModel)]="editDescription" rows="4" placeholder="Ex: carteira com documentos"></textarea>
+
+        <label>Local</label>
+        <input [(ngModel)]="editLocation" placeholder="Ex: praça central" />
+
+        <label>Data</label>
+        <input [(ngModel)]="editDateLost" type="date" />
+
+        <label>Foto do item (opcional)</label>
+        <input type="file" (change)="selectEditFile($event)" />
+
+        <div class="form-actions">
+          <button class="button-primary" (click)="updateItem()">Salvar</button>
+          <button class="button-secondary" (click)="cancelEdit()">Cancelar</button>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+
+  <section class="card list-card">
+    <div class="card-body">
+      <h3>Itens cadastrados</h3>
+      <div *ngIf="items.length === 0" class="empty-state">
+        Nenhum item cadastrado ainda.
+      </div>
+      <div class="admin-items-grid">
+        <div *ngFor="let item of items" class="item-card admin-item-card">
+          <div class="card-image">
+            <img [src]="'http://localhost:3000' + item.image_url" alt="Imagem do item" />
+          </div>
+          <div class="card-content">
+            <div class="meta">
+              <span>{{ item.location }}</span>
+              <span>{{ item.date_lost | date:'mediumDate' }}</span>
+            </div>
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.description }}</p>
+            <div class="button-group">
+              <button class="button-primary" (click)="startEdit(item)">Editar</button>
+              <button class="button-danger" (click)="deleteItem(item.id)">Devolver / Excluir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

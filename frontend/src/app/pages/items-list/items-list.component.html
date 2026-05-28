@@ -1,0 +1,31 @@
+<div class="page-header">
+  <div>
+    <p class="eyebrow">Achados & Perdidos</p>
+    <h1>Itens publicados</h1>
+    <p class="subtitle">Confira os itens recentes e ajude a devolver ao dono.</p>
+  </div>
+</div>
+
+<div *ngIf="error" class="alert">{{ error }}</div>
+
+<div *ngIf="items.length === 0" class="empty-state card">
+  <div class="card-body">
+    Nenhum item encontrado ainda. Volte mais tarde ou publique um item se for administrador.
+  </div>
+</div>
+
+<div class="items-grid">
+  <div *ngFor="let item of items" class="item-card">
+    <div class="card-image">
+      <img [src]="'http://localhost:3000' + item.image_url" alt="Imagem do item" />
+    </div>
+    <div class="card-body">
+      <div class="meta">
+        <span>{{ item.location }}</span>
+        <span>{{ item.date_lost | date:'mediumDate' }}</span>
+      </div>
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.description }}</p>
+    </div>
+  </div>
+</div>

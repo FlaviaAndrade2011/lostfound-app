@@ -1,0 +1,20 @@
+[
+  {
+    "id": 2,
+    "title": "teste",
+    "description": "teste feito diaaa",
+    "location": "lanche",
+    "date_lost": "2026-05-20",
+    "image_url": "/uploads/1779928319022-Captura-de-tela-2026-02-11-092744.png",
+    "created_at": "2026-05-28T00:31:59.032Z"
+  },
+  {
+    "id": 1,
+    "title": "teste",
+    "description": "tstet g ggszghsfgxd fghsdg",
+    "location": "tertgdgd dsd",
+    "date_lost": "2026-05-26",
+    "image_url": "/uploads/1779928109058-20260207_214217.jpg",
+    "created_at": "2026-05-28T00:28:29.071Z"
+  }
+]
