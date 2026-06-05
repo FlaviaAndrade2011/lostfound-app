@@ -4,6 +4,7 @@ const itemsController = require('../controllers/itemsController');
 const verifyToken = require('../middleware/authMiddleware');
 
 router.get('/', itemsController.getItems);
+router.post('/public', itemsController.upload.single('image'), itemsController.addPublicItem);
 router.post('/', verifyToken, itemsController.upload.single('image'), itemsController.addItem);
 router.put('/:id', verifyToken, itemsController.upload.single('image'), itemsController.updateItem);
 router.delete('/:id', verifyToken, itemsController.deleteItem);

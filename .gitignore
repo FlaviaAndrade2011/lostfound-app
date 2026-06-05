@@ -4,3 +4,22 @@ backend/node_modules/
 backend/uploads/
 .env
 .DS_Store
+
+dist/
+**/dist/
+frontend/dist/
+backend/dist/
+frontend/.angular/
+
+# Specific Angular cache folder
+frontend/.angular/cache/17.3.17/angular-webpack
+
+.cache/
+.parcel-cache/
+.vite/
+
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

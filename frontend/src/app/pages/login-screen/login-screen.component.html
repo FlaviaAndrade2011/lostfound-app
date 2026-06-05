@@ -1,0 +1,47 @@
+<div class="login-shell">
+  <div class="login-card">
+    <div class="login-header">
+      <p class="eyebrow">Acesso ao mural</p>
+      <h1>Escolha seu perfil</h1>
+      <p class="subtitle">Acesse como administrador ou aluno para continuar.</p>
+      <button class="button-secondary view-items-button" (click)="viewItems()">Ver itens publicados</button>
+    </div>
+
+    <div *ngIf="!selectedRole" class="role-grid">
+      <button class="role-card" (click)="chooseRole('student')">
+        <span class="role-title">Aluno</span>
+        <span class="role-text">Publicar perdido e acompanhar o mural.</span>
+      </button>
+      <button class="role-card role-card-secondary" (click)="chooseRole('admin')">
+        <span class="role-title">Admin</span>
+        <span class="role-text">Acessar painel de gerenciamento do sistema.</span>
+      </button>
+    </div>
+
+    <div *ngIf="selectedRole === 'student'" class="form-card">
+      <div class="form-body">
+        <div class="form-top">
+          <p class="eyebrow">Login do aluno</p>
+          <h2>Entrar como Aluno</h2>
+        </div>
+
+        <div *ngIf="errorMessage" class="alert">{{ errorMessage }}</div>
+
+        <label>Matrícula</label>
+        <input
+          [(ngModel)]="matricula"
+          (ngModelChange)="onMatriculaChange($event)"
+          placeholder="Digite 7 números"
+          maxlength="7"
+          inputmode="numeric"
+        />
+
+        <label>Senha</label>
+        <input [(ngModel)]="password" type="password" placeholder="Senha" />
+
+        <button class="button-primary" (click)="submitStudent()">Entrar</button>
+        <button class="button-secondary" (click)="resetSelection()">Voltar</button>
+      </div>
+    </div>
+  </div>
+</div>

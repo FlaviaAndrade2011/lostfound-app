@@ -34,7 +34,8 @@ async function addItem(req, res) {
             title,
             description,
             location,
-            dateLost
+            dateLost,
+            status
         } = req.body;
         if (!req.file) {
             return res.status(400).json({
@@ -48,7 +49,8 @@ async function addItem(req, res) {
             description,
             location,
             dateLost,
-            imageUrl
+            imageUrl,
+            status: status || 'Achado'
         });
 
         res.status(201).json({
@@ -59,6 +61,49 @@ async function addItem(req, res) {
         console.error(error);
         res.status(500).json({
             message: 'Could not add item.'
+        });
+    }
+}
+
+async function addPublicItem(req, res) {
+    try {
+        const {
+            description,
+            studentMatricula,
+            status
+        } = req.body;
+
+        if (!studentMatricula || !studentMatricula.trim()) {
+            return res.status(400).json({
+                message: 'Matrícula do aluno não encontrada. Faça login novamente antes de publicar.'
+            });
+        }
+
+        if (!description || !description.trim()) {
+            return res.status(400).json({
+                message: 'A descrição é obrigatória.'
+            });
+        }
+
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+        const itemId = await itemModel.createItem({
+            title: 'Publicação de Aluno',
+            description,
+            location: '',
+            dateLost: '',
+            imageUrl,
+            studentMatricula,
+            status: status || 'Perdido'
+        });
+
+        res.status(201).json({
+            message: 'Publicação adicionada com sucesso.',
+            itemId
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Could not add public item.'
         });
     }
 }
@@ -76,7 +121,8 @@ async function updateItem(req, res) {
             title,
             description,
             location,
-            dateLost
+            dateLost,
+            status
         } = req.body;
 
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
@@ -86,7 +132,8 @@ async function updateItem(req, res) {
             description,
             location,
             dateLost,
-            imageUrl
+            imageUrl,
+            status
         });
 
         if (!updated) {
@@ -137,6 +184,7 @@ module.exports = {
     upload,
     getItems,
     addItem,
+    addPublicItem,
     updateItem,
     deleteItem
 };

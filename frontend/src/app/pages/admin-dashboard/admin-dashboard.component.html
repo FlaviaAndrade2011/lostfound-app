@@ -1,84 +1,184 @@
-<div class="dashboard-grid">
-  <section class="card form-card">
-    <div class="card-body">
-      <div class="dashboard-header">
-        <div>
-          <p class="eyebrow">Painel de Administração</p>
-          <h2>{{ editingId ? 'Editar item' : 'Gerenciar itens' }}</h2>
-        </div>
-        <button class="button-secondary" (click)="logout()">Sair</button>
+<div class="dashboard-shell">
+  <div class="dashboard-header">
+    <div>
+      <p class="eyebrow">Painel de Administração</p>
+      <h1>Postagens e alunos</h1>
+      <p class="subtitle">Comece pelas postagens e navegue para a lista de alunos quando precisar cadastrar ou editar.</p>
+    </div>
+    <div class="header-actions">
+      <button class="tab-button" [class.active]="currentView === 'posts'" (click)="setView('posts')">Postagens</button>
+      <button class="tab-button" [class.active]="currentView === 'students'" (click)="setView('students')">Alunos</button>
+      <button class="button-secondary" (click)="navigateToItems()">Ver itens publicados</button>
+      <button class="button-secondary" (click)="logout()">Sair</button>
+    </div>
+  </div>
+
+  <div *ngIf="currentView === 'posts'" class="view-section">
+    <div class="section-actions">
+      <button class="button-primary" (click)="toggleItemForm()">
+        {{ showItemForm ? 'Ocultar formulário de item' : 'Cadastrar item achado' }}
+      </button>
+      <button class="button-secondary" (click)="setView('students')">Ir para alunos</button>
+    </div>
+
+    <div *ngIf="showItemForm || editingId" class="card form-card">
+      <div class="card-body">
+        <h2>{{ editingId ? 'Editar item encontrado' : 'Cadastrar item encontrado' }}</h2>
+
+        <ng-container *ngIf="!editingId">
+          <label>Título do item</label>
+          <input [(ngModel)]="title" placeholder="Ex: Carteira preta" />
+
+          <label>Descrição</label>
+          <textarea [(ngModel)]="description" rows="4" placeholder="Ex: carteira com documentos"></textarea>
+
+          <label>Local</label>
+          <input [(ngModel)]="location" placeholder="Ex: praça central" />
+
+          <label>Data</label>
+          <input [(ngModel)]="dateLost" type="date" />
+
+          <label>Status</label>
+          <select [(ngModel)]="status">
+            <option value="Achado">Achado</option>
+            <option value="Perdido">Perdido</option>
+          </select>
+
+          <label>Foto do item</label>
+          <input type="file" (change)="selectFile($event)" />
+
+          <div class="form-actions">
+            <button class="button-primary" (click)="submit()">Enviar item achado</button>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="editingId">
+          <label>Título do item</label>
+          <input [(ngModel)]="editTitle" placeholder="Ex: Carteira preta" />
+
+          <label>Descrição</label>
+          <textarea [(ngModel)]="editDescription" rows="4" placeholder="Ex: carteira com documentos"></textarea>
+
+          <label>Local</label>
+          <input [(ngModel)]="editLocation" placeholder="Ex: praça central" />
+
+          <label>Data</label>
+          <input [(ngModel)]="editDateLost" type="date" />
+
+          <label>Status</label>
+          <select [(ngModel)]="editStatus">
+            <option value="Achado">Achado</option>
+            <option value="Perdido">Perdido</option>
+          </select>
+
+          <label>Foto do item (opcional)</label>
+          <input type="file" (change)="selectEditFile($event)" />
+
+          <div class="form-actions">
+            <button class="button-primary" (click)="updateItem()">Salvar item</button>
+            <button class="button-secondary" (click)="cancelEdit()">Cancelar</button>
+          </div>
+        </ng-container>
       </div>
+    </div>
 
-      <div *ngIf="message" class="alert">{{ message }}</div>
+    <section class="card list-card">
+      <div class="card-body">
+        <h2>Postagens principais</h2>
+        <div *ngIf="items.length === 0" class="empty-state">Nenhum item cadastrado ainda.</div>
+        <div class="admin-items-grid">
+          <div *ngFor="let item of items" class="item-card admin-item-card">
+            <div class="card-image" *ngIf="item.image_url; else noImage">
+              <img [src]="'http://localhost:3000' + item.image_url" alt="Imagem do item" />
+            </div>
+            <ng-template #noImage>
+              <div class="card-image placeholder">Sem foto</div>
+            </ng-template>
 
-      <ng-container *ngIf="!editingId">
-        <label>Título do item</label>
-        <input [(ngModel)]="title" placeholder="Ex: Carteira preta" />
+            <div class="card-content">
+              <div class="meta">
+                <span>{{ item.location }}</span>
+                <span>{{ item.date_lost | date:'mediumDate' }}</span>
+              </div>
+              <div class="item-status">
+                <span class="badge" [ngClass]="item.status === 'Achado' ? 'admin-badge' : 'student-badge'">
+                  {{ item.status || (item.studentMatricula ? 'Perdido' : 'Achado') }}
+                </span>
+                <span *ngIf="item.studentMatricula" class="meta">Matrícula: {{ item.studentMatricula }}</span>
+              </div>
+              <h4>{{ item.title }}</h4>
+              <p>{{ item.description }}</p>
+              <div class="button-group">
+                <button class="button-primary" (click)="startEdit(item)">Editar</button>
+                <button class="button-danger" (click)="deleteItem(item.id)">Devolver / Excluir</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
-        <label>Descrição</label>
-        <textarea [(ngModel)]="description" rows="4" placeholder="Ex: carteira com documentos"></textarea>
+  <div *ngIf="currentView === 'students'" class="view-section">
+    <div class="section-actions">
+      <button class="button-primary" (click)="toggleStudentForm()">
+        {{ showStudentForm ? 'Ocultar formulário de aluno' : 'Cadastrar aluno' }}
+      </button>
+      <button class="button-secondary" (click)="setView('posts')">Ir para postagens</button>
+    </div>
 
-        <label>Local</label>
-        <input [(ngModel)]="location" placeholder="Ex: praça central" />
+    <div *ngIf="showStudentForm" class="card form-card">
+      <div class="card-body">
+        <h2>{{ editingStudentMatricula ? 'Editar aluno' : 'Cadastrar aluno' }}</h2>
 
-        <label>Data</label>
-        <input [(ngModel)]="dateLost" type="date" />
+        <label>Matrícula</label>
+        <input [(ngModel)]="studentMatricula" placeholder="Ex: 20230001" [disabled]="editingStudentMatricula !== null" />
 
-        <label>Foto do item</label>
-        <input type="file" (change)="selectFile($event)" />
+        <label>Email</label>
+        <input [(ngModel)]="studentEmail" placeholder="Email do aluno" />
 
-        <button class="button-primary" (click)="submit()">Enviar item perdido</button>
-      </ng-container>
+        <label>Curso</label>
+        <input [(ngModel)]="studentCourse" placeholder="Curso" />
 
-      <ng-container *ngIf="editingId">
-        <label>Título do item</label>
-        <input [(ngModel)]="editTitle" placeholder="Ex: Carteira preta" />
+        <label>Telefone</label>
+        <input [(ngModel)]="studentPhone" placeholder="Telefone" />
 
-        <label>Descrição</label>
-        <textarea [(ngModel)]="editDescription" rows="4" placeholder="Ex: carteira com documentos"></textarea>
-
-        <label>Local</label>
-        <input [(ngModel)]="editLocation" placeholder="Ex: praça central" />
-
-        <label>Data</label>
-        <input [(ngModel)]="editDateLost" type="date" />
-
-        <label>Foto do item (opcional)</label>
-        <input type="file" (change)="selectEditFile($event)" />
+        <label>Senha</label>
+        <input [(ngModel)]="studentPassword" type="password" placeholder="Senha do aluno" />
+        <small *ngIf="editingStudentMatricula" class="hint">Deixe em branco para manter a senha atual.</small>
 
         <div class="form-actions">
-          <button class="button-primary" (click)="updateItem()">Salvar</button>
-          <button class="button-secondary" (click)="cancelEdit()">Cancelar</button>
+          <button class="button-primary" (click)="saveStudent()">{{ editingStudentMatricula ? 'Salvar alterações' : 'Cadastrar aluno' }}</button>
+          <button class="button-secondary" *ngIf="editingStudentMatricula" (click)="clearStudentForm()">Cancelar</button>
         </div>
-      </ng-container>
+      </div>
     </div>
-  </section>
 
-  <section class="card list-card">
-    <div class="card-body">
-      <h3>Itens cadastrados</h3>
-      <div *ngIf="items.length === 0" class="empty-state">
-        Nenhum item cadastrado ainda.
-      </div>
-      <div class="admin-items-grid">
-        <div *ngFor="let item of items" class="item-card admin-item-card">
-          <div class="card-image">
-            <img [src]="'http://localhost:3000' + item.image_url" alt="Imagem do item" />
-          </div>
-          <div class="card-content">
-            <div class="meta">
-              <span>{{ item.location }}</span>
-              <span>{{ item.date_lost | date:'mediumDate' }}</span>
-            </div>
-            <h4>{{ item.title }}</h4>
-            <p>{{ item.description }}</p>
-            <div class="button-group">
-              <button class="button-primary" (click)="startEdit(item)">Editar</button>
-              <button class="button-danger" (click)="deleteItem(item.id)">Devolver / Excluir</button>
+    <section class="card list-card">
+      <div class="card-body">
+        <h2>Alunos cadastrados</h2>
+        <div *ngIf="students.length === 0" class="empty-state">Nenhum aluno cadastrado.</div>
+        <div class="admin-items-grid student-list">
+          <div *ngFor="let student of students" class="item-card admin-item-card">
+            <div class="card-content">
+              <div class="meta">
+                <span>{{ student.matricula }}</span>
+                <span>{{ student.course }}</span>
+              </div>
+              <h4>{{ student.email }}</h4>
+              <p>Telefone: {{ student.phone }}</p>
+              <div class="button-group">
+                <button class="button-primary" (click)="editStudent(student)">Editar</button>
+                <button class="button-danger" (click)="deleteStudent(student.matricula)">Excluir</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </section>
+
+    <div class="section-footer">
+      <button class="button-primary" (click)="setView('posts'); showItemForm = true">Cadastrar item achado</button>
     </div>
-  </section>
+  </div>
 </div>

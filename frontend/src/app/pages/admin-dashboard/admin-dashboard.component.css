@@ -6,6 +6,12 @@
   max-width: 1280px;
 }
 
+:host {
+  display: block;
+  padding: 24px;
+  background: #f8fafc;
+}
+
 @media (max-width: 960px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -29,6 +35,52 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.tab-button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 14px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.tab-button.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.section-actions {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.section-footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.form-hidden-note {
+  padding: 18px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 18px;
+  background: #f8fafc;
+  color: #475569;
+  margin-top: 16px;
 }
 
 .eyebrow {
@@ -56,6 +108,14 @@ label {
   margin-bottom: 8px;
   color: #334155;
   font-weight: 600;
+}
+
+.hint {
+  display: block;
+  margin-top: -12px;
+  margin-bottom: 14px;
+  color: #64748b;
+  font-size: 0.85rem;
 }
 
 input,
@@ -143,6 +203,34 @@ button {
   margin: 0;
   color: #475569;
   line-height: 1.6;
+}
+
+.item-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.student-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.admin-badge {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
 .meta {

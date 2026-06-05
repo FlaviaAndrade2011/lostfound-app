@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const authRoutes = require('./routes/auth');
 const itemsRoutes = require('./routes/items');
+const studentRoutes = require('./routes/students');
 const adminModel = require('./models/adminModel');
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemsRoutes);
+app.use('/api/students', studentRoutes);
 
 app.get('/', (req, res) => {
     res.send({

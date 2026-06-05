@@ -6,8 +6,12 @@ const itemsFile = path.join(__dirname, '..', 'data', 'items.json');
 
 async function readFallbackItems() {
     try {
-        const content = await fs.readFile(itemsFile, 'utf8');
-        return JSON.parse(content || '[]');
+        const items = JSON.parse(await fs.readFile(itemsFile, 'utf8') || '[]');
+        return items.map(item => ({
+            ...item,
+            studentMatricula: item.studentMatricula || item.student_matricula,
+            status: item.status || (item.studentMatricula || item.student_matricula ? 'Perdido' : 'Achado')
+        }));
     } catch (error) {
         if (error.code === 'ENOENT') {
             await fs.writeFile(itemsFile, '[]', 'utf8');
@@ -23,7 +27,7 @@ async function writeFallbackItems(items) {
 
 async function getAllItems() {
     try {
-        const [rows] = await db.query('SELECT id, title, description, location, date_lost, image_url, created_at FROM items ORDER BY created_at DESC');
+        const [rows] = await db.query('SELECT id, title, description, location, date_lost, image_url, created_at, student_matricula AS studentMatricula, status FROM items ORDER BY created_at DESC');
         return rows;
     } catch (error) {
         console.warn('DB unavailable, using fallback items storage:', error.message || error);
@@ -34,8 +38,8 @@ async function getAllItems() {
 async function createItem(item) {
     try {
         const [result] = await db.execute(
-            'INSERT INTO items (title, description, location, date_lost, image_url) VALUES (?, ?, ?, ?, ?)',
-            [item.title, item.description, item.location, item.dateLost, item.imageUrl]
+            'INSERT INTO items (title, description, location, date_lost, image_url, student_matricula, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [item.title, item.description, item.location, item.dateLost, item.imageUrl, item.studentMatricula || null, item.status || (item.studentMatricula ? 'Perdido' : 'Achado')]
         );
         return result.insertId;
     } catch (error) {
@@ -49,6 +53,8 @@ async function createItem(item) {
             location: item.location,
             date_lost: item.dateLost,
             image_url: item.imageUrl,
+            studentMatricula: item.studentMatricula,
+            status: item.status || (item.studentMatricula ? 'Perdido' : 'Achado'),
             created_at: new Date().toISOString()
         };
         items.unshift(fallbackItem);
@@ -82,6 +88,10 @@ async function updateItem(itemId, updates) {
             fields.push('image_url = ?');
             values.push(updates.imageUrl);
         }
+        if (updates.status !== undefined) {
+            fields.push('status = ?');
+            values.push(updates.status);
+        }
 
         if (fields.length === 0) return true;
 
@@ -102,6 +112,7 @@ async function updateItem(itemId, updates) {
             if (updates.location !== undefined) items[itemIndex].location = updates.location;
             if (updates.dateLost !== undefined) items[itemIndex].date_lost = updates.dateLost;
             if (updates.imageUrl !== undefined) items[itemIndex].image_url = updates.imageUrl;
+            if (updates.status !== undefined) items[itemIndex].status = updates.status;
 
             await writeFallbackItems(items);
             return true;

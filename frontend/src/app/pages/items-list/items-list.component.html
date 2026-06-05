@@ -16,13 +16,23 @@
 
 <div class="items-grid">
   <div *ngFor="let item of items" class="item-card">
-    <div class="card-image">
+    <div *ngIf="item.image_url; else noImage" class="card-image">
       <img [src]="'http://localhost:3000' + item.image_url" alt="Imagem do item" />
     </div>
+    <ng-template #noImage>
+      <div class="card-image placeholder">Sem foto</div>
+    </ng-template>
+
     <div class="card-body">
       <div class="meta">
-        <span>{{ item.location }}</span>
-        <span>{{ item.date_lost | date:'mediumDate' }}</span>
+        <span>{{ item.location || 'Local não informado' }}</span>
+        <span>{{ item.date_lost ? (item.date_lost | date:'mediumDate') : 'Data não informada' }}</span>
+      </div>
+      <div class="card-labels">
+        <span class="badge" [ngClass]="item.studentMatricula ? 'student-badge' : 'admin-badge'">
+          {{ item.studentMatricula ? 'Perdido por aluno' : 'Achado / Admin' }}
+        </span>
+        <span *ngIf="item.studentMatricula" class="item-owner">Matrícula: {{ item.studentMatricula }}</span>
       </div>
       <h2>{{ item.title }}</h2>
       <p>{{ item.description }}</p>

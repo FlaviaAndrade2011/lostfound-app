@@ -1,0 +1,81 @@
+<section class="dashboard-shell">
+  <div class="dashboard-header">
+    <div>
+      <p class="eyebrow">Perfil do Aluno</p>
+      <h1>Meu perfil e publicação</h1>
+      <p class="subtitle">Atualize seus dados e publique itens perdidos ou achados para que o administrador possa ajudar.</p>
+    </div>
+    <div class="header-actions">
+      <button class="button-secondary" (click)="viewPublicItems()">Ver itens publicados</button>
+      <button class="button-secondary" (click)="logout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card form-card">
+      <div class="card-body">
+        <h2>Dados do aluno</h2>
+        <label>Email</label>
+        <input [(ngModel)]="studentEmail" placeholder="Email" />
+
+        <label>Matrícula</label>
+        <input [value]="studentMatricula" disabled />
+
+        <label>Curso</label>
+        <input [(ngModel)]="studentCourse" placeholder="Curso" />
+
+        <label>Telefone</label>
+        <input [(ngModel)]="studentPhone" placeholder="Telefone" />
+
+        <button class="button-primary" (click)="saveProfile()">Salvar perfil</button>
+        <div *ngIf="profileMessage" class="alert">{{ profileMessage }}</div>
+      </div>
+    </div>
+
+    <div class="card form-card">
+      <div class="card-body">
+        <h2>Publicar item desaparecido</h2>
+        <label>Descrição</label>
+        <textarea [(ngModel)]="description" rows="5" placeholder="Descreva o item"></textarea>
+
+        <label>Status</label>
+        <select [(ngModel)]="status">
+          <option value="Perdido">Perdido</option>
+          <option value="Achado">Achado</option>
+        </select>
+
+        <label>Foto (opcional)</label>
+        <input type="file" accept="image/*" (change)="selectFile($event)" />
+
+        <button class="button-primary" (click)="submit()">Publicar no mural</button>
+        <div *ngIf="message" class="alert">{{ message }}</div>
+      </div>
+    </div>
+
+    <div class="card list-card">
+      <div class="card-body">
+        <p class="eyebrow">Mural público</p>
+        <h2>Últimas publicações</h2>
+        <div *ngIf="items.length === 0" class="empty-state">Ainda não há publicações.</div>
+        <div *ngFor="let item of items" class="item-card">
+          <div *ngIf="item.image_url; else noImage" class="card-image">
+            <img [src]="'http://localhost:3000' + item.image_url" alt="Imagem do item" />
+          </div>
+          <ng-template #noImage>
+            <div class="card-image placeholder">Sem foto</div>
+          </ng-template>
+
+          <div class="card-content">
+            <div class="item-status">
+              <span class="badge" [ngClass]="item.status === 'Achado' ? 'admin-badge' : 'student-badge'">
+                {{ item.status || (item.studentMatricula ? 'Perdido' : 'Achado') }}
+              </span>
+              <span *ngIf="item.studentMatricula" class="meta">Matrícula: {{ item.studentMatricula }}</span>
+            </div>
+            <p class="description">{{ item.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

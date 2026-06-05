@@ -6,4 +6,6 @@ export interface Item {
     date_lost: string;
     image_url: string;
     created_at: string;
+    studentMatricula?: string;
+    status?: string;
 }
