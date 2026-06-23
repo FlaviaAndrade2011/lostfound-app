@@ -1,20 +1,42 @@
 [
   {
-    "id": 2,
-    "title": "fhzdfhzdh",
-    "description": "zhfzfhzrfta\\re tbrtgaw 5gvtqwr rtser vra awrtagzfgzd rtwrtz",
-    "location": "awertaer",
+    "id": 4,
+    "title": "Publicação de Aluno",
+    "description": "Teste de cadastro de itens por alunos",
+    "location": "",
     "date_lost": "",
-    "image_url": "/uploads/1780626484134-Captura-de-tela-2026-04-11-000320.png",
-    "created_at": "2026-06-05T02:28:04.146Z"
+    "studentMatricula": "6999477",
+    "status": "Perdido",
+    "created_at": "2026-06-23T00:47:31.650Z"
+  },
+  {
+    "id": 3,
+    "title": "Publicação de Aluno",
+    "description": "asdsadasdwewewewe",
+    "location": "",
+    "date_lost": "",
+    "studentMatricula": "6999477",
+    "status": "Perdido",
+    "created_at": "2026-06-23T00:25:32.893Z"
+  },
+  {
+    "id": 2,
+    "title": "Publicação de Aluno",
+    "description": "perdi minha saia no banheiro do corredor principal",
+    "location": "",
+    "date_lost": "",
+    "studentMatricula": "6999477",
+    "status": "Perdido",
+    "created_at": "2026-06-23T00:24:55.484Z"
   },
   {
     "id": 1,
     "title": "Publicação de Aluno",
-    "description": "hfsdgsrfgzsrzsrtgsz\\",
+    "description": "perdi uma cueca",
     "location": "",
     "date_lost": "",
-    "studentMatricula": "6786786",
-    "created_at": "2026-06-05T02:23:57.582Z"
+    "studentMatricula": "0123456",
+    "status": "Perdido",
+    "created_at": "2026-06-09T22:24:12.326Z"
   }
 ]

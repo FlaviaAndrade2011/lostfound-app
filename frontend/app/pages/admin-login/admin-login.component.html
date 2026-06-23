@@ -1,0 +1,22 @@
+<div class="login-shell">
+  <div class="login-card">
+    <div class="login-header">
+      <p class="eyebrow">Acesso administrativo</p>
+      <h1>Entrar como Admin</h1>
+      <p class="subtitle">Acesse o painel de gerenciamento do sistema.</p>
+    </div>
+
+    <div class="form-card">
+      <div *ngIf="errorMessage" class="alert">{{ errorMessage }}</div>
+
+      <label>Usuário</label>
+      <input [(ngModel)]="username" placeholder="Nome de usuário" />
+
+      <label>Senha</label>
+      <input [(ngModel)]="password" type="password" placeholder="Senha" />
+
+      <button class="button-primary" (click)="submit()">Entrar</button>
+      <button class="button-secondary" (click)="goBack()">Voltar</button>
+    </div>
+  </div>
+</div>

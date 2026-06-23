@@ -35,11 +35,40 @@ async function getAllItems() {
     }
 }
 
+async function getItemsByStudentMatricula(matricula) {
+    try {
+        const [rows] = await db.query(
+            'SELECT id, title, description, location, date_lost, image_url, created_at, student_matricula AS studentMatricula, status FROM items WHERE student_matricula = ? ORDER BY created_at DESC',
+            [matricula]
+        );
+        return rows;
+    } catch (error) {
+        console.warn('DB unavailable, filtering fallback items by student:', error.message || error);
+        const items = await readFallbackItems();
+        return items.filter(item => String(item.studentMatricula || item.student_matricula || '') === String(matricula));
+    }
+}
+
+async function getItemById(itemId) {
+    try {
+        const [rows] = await db.query(
+            'SELECT id, title, description, location, date_lost, image_url, created_at, student_matricula AS studentMatricula, status FROM items WHERE id = ? LIMIT 1',
+            [itemId]
+        );
+        return rows[0] || null;
+    } catch (error) {
+        console.warn('DB unavailable, using fallback item lookup:', error.message || error);
+        const items = await readFallbackItems();
+        const found = items.find(item => Number(item.id) === Number(itemId));
+        return found || null;
+    }
+}
+
 async function createItem(item) {
     try {
         const [result] = await db.execute(
             'INSERT INTO items (title, description, location, date_lost, image_url, student_matricula, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [item.title, item.description, item.location, item.dateLost, item.imageUrl, item.studentMatricula || null, item.status || (item.studentMatricula ? 'Perdido' : 'Achado')]
+            [item.title, item.description ?? null, item.location ?? null, item.dateLost ?? null, item.imageUrl ?? null, item.studentMatricula ?? null, item.status || (item.studentMatricula ? 'Perdido' : 'Achado')]
         );
         return result.insertId;
     } catch (error) {
@@ -150,6 +179,8 @@ async function deleteItem(itemId) {
 
 module.exports = {
     getAllItems,
+    getItemsByStudentMatricula,
+    getItemById,
     createItem,
     updateItem,
     deleteItem

@@ -1,14 +1,15 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const authRoutes = require('./routes/auth');
 const itemsRoutes = require('./routes/items');
 const studentRoutes = require('./routes/students');
 const adminModel = require('./models/adminModel');
-
-dotenv.config();
+const initDb = require('./models/initDb');
 
 async function ensureDefaultAdmin() {
     const count = await adminModel.getAdminCount();
@@ -39,10 +40,11 @@ app.get('/', (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-ensureDefaultAdmin()
+initDb()
+    .then(() => ensureDefaultAdmin())
     .catch((error) => {
-        console.warn('Could not create default admin:', error.message || error);
-        console.warn('Continuing startup without database-backed admin creation. Fallback login is still available.');
+        console.warn('Could not initialize database:', error.message || error);
+        console.warn('Continuing startup without database. Fallback storage is still available.');
     })
     .finally(() => {
         app.listen(port, () => {

@@ -90,9 +90,9 @@ async function loginStudent(req, res) {
             password
         } = req.body;
 
-        if (!matricula || !/^[0-9]{7,8}$/.test(matricula)) {
+        if (!matricula || !/^[0-9]{7}$/.test(matricula)) {
             return res.status(400).json({
-                message: 'A matrícula deve conter 7 ou 8 números.'
+                message: 'A matrícula deve conter exatamente 7 números.'
             });
         }
 

@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": 1,
+    "matricula": "1234567",
+    "email": "teste@teste.com",
+    "course": "cefsfsfwsef",
+    "phone": "84684646",
+    "passwordHash": "$2b$10$bexYlaQ9ItD/th3WOnbAuOrQvwrt8XIBq1rBJLWQgY61sZp/aUTyC"
+  },
+  {
+    "id": 2,
+    "matricula": "0123456",
+    "email": "luis@teste.com",
+    "course": "jajajajdkjwelnfweljnd",
+    "phone": "84354676168",
+    "passwordHash": "$2b$10$59hoL0/V9TCVGBtW6Bru1ubNNWxFXKlUbtTR.hZY3J7.K2lhubli."
+  }
+]

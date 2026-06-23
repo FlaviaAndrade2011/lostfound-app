@@ -1,0 +1,134 @@
+<div class="home-layout">
+
+  <!-- Mural de itens (esquerda) -->
+  <main class="mural-panel">
+    <div class="mural-header">
+      <div>
+        <p class="eyebrow">Mural público</p>
+        <h2>Itens recentes</h2>
+      </div>
+      <span class="item-count" *ngIf="!itemsLoading">{{ items.length }} {{ items.length === 1 ? 'item' : 'itens' }}</span>
+    </div>
+
+    <div *ngIf="itemsLoading" class="mural-loading">
+      <div class="skeleton" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <div *ngIf="!itemsLoading && items.length > 0" class="mural-grid">
+      <div *ngFor="let item of items" class="mural-card">
+        <img
+          [src]="item.image_url ? 'http://localhost:3000' + item.image_url : 'https://placehold.co/400x180?text=Sem+foto'"
+          alt="Imagem do item"
+          (error)="$any($event.target).src='https://placehold.co/400x180?text=Sem+foto'"
+          class="mural-img"
+        />
+        <div class="mural-body">
+          <div class="mural-meta">
+            <span class="badge" [ngClass]="item.studentMatricula ? 'badge-lost' : 'badge-found'">
+              {{ item.studentMatricula ? 'Perdido' : 'Achado' }}
+            </span>
+            <span class="mural-date">{{ item.date_lost ? (item.date_lost | date:'dd/MM/yy') : '' }}</span>
+          </div>
+          <h3 class="mural-title">{{ item.title }}</h3>
+          <p class="mural-desc">{{ item.description }}</p>
+          <p *ngIf="item.location" class="mural-location">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ item.location }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!itemsLoading && items.length === 0" class="mural-empty">
+      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <p>Nenhum item publicado ainda.</p>
+    </div>
+  </main>
+
+  <!-- Painel de login (direita) -->
+  <aside class="login-panel">
+    <div class="login-card">
+
+      <div class="brand-block">
+        <div class="brand-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <p class="brand-name">Achados &amp; Perdidos</p>
+      </div>
+
+      <!-- Seleção de perfil -->
+      <ng-container *ngIf="!selectedRole">
+        <h1>Perdeu ou encontrou algo?</h1>
+        <p class="subtitle">Registre no mural e ajude a devolver ao dono.</p>
+
+        <div class="notice-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Para registrar um item, faça login com sua conta.
+        </div>
+
+        <div class="divider"><span>Entre com sua conta</span></div>
+
+        <div class="role-grid">
+          <button class="role-card" (click)="chooseRole('student')">
+            <span class="role-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <span class="role-title">Aluno</span>
+            <span class="role-text">Publique e acompanhe seus itens perdidos.</span>
+          </button>
+          <button class="role-card role-card-admin" (click)="chooseRole('admin')">
+            <span class="role-icon role-icon-admin">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <span class="role-title">Administrador</span>
+            <span class="role-text">Gerencie itens e alunos cadastrados.</span>
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Formulário Aluno -->
+      <ng-container *ngIf="selectedRole === 'student'">
+        <p class="eyebrow">Login do aluno</p>
+        <h1>Entrar como Aluno</h1>
+
+        <div *ngIf="errorMessage" class="alert">{{ errorMessage }}</div>
+
+        <label>Matrícula</label>
+        <input [(ngModel)]="matricula" (ngModelChange)="onMatriculaChange($event)"
+          placeholder="Digite seus 7 números" maxlength="7" inputmode="numeric" />
+
+        <label>Senha</label>
+        <input [(ngModel)]="password" type="password" placeholder="Sua senha" />
+
+        <button class="button-primary" (click)="submitStudent()">Entrar</button>
+        <button class="button-secondary" (click)="resetSelection()">← Voltar</button>
+      </ng-container>
+
+      <!-- Formulário Admin -->
+      <ng-container *ngIf="selectedRole === 'admin'">
+        <p class="eyebrow">Acesso administrativo</p>
+        <h1>Entrar como Admin</h1>
+
+        <div *ngIf="errorMessage" class="alert">{{ errorMessage }}</div>
+
+        <label>Usuário</label>
+        <input [(ngModel)]="adminUsername" placeholder="Nome de usuário" />
+
+        <label>Senha</label>
+        <input [(ngModel)]="adminPassword" type="password" placeholder="Sua senha" />
+
+        <button class="button-primary" (click)="submitAdmin()">Entrar</button>
+        <button class="button-secondary" (click)="resetSelection()">← Voltar</button>
+      </ng-container>
+
+    </div>
+  </aside>
+
+
+</div>

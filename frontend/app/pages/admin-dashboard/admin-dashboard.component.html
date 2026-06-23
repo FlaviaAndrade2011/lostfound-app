@@ -1,0 +1,223 @@
+<div class="dashboard-shell">
+
+  <!-- Topo -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <p class="eyebrow">Painel de Administração</p>
+      <h1>Gerenciamento</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-ghost" (click)="navigateToItems()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Ver mural
+      </button>
+      <button class="btn-ghost btn-logout" (click)="logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="currentView === 'posts'" (click)="setView('posts')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Postagens
+      <span class="tab-count">{{ items.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="currentView === 'students'" (click)="setView('students')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Alunos
+      <span class="tab-count">{{ students.length }}</span>
+    </button>
+  </div>
+
+  <!-- VIEW: Postagens -->
+  <div *ngIf="currentView === 'posts'" class="view-section">
+
+    <div class="content-layout" [class.has-form]="showItemForm || editingId">
+
+      <!-- Formulário -->
+      <aside *ngIf="showItemForm || editingId" class="form-panel">
+        <div class="panel-header">
+          <h3>{{ editingId ? 'Editar item' : 'Novo item' }}</h3>
+          <button class="btn-close" (click)="editingId ? cancelEdit() : toggleItemForm()" title="Fechar">✕</button>
+        </div>
+
+        <ng-container *ngIf="!editingId">
+          <label>Título</label>
+          <input [(ngModel)]="title" placeholder="Ex: Carteira preta" />
+          <label>Descrição</label>
+          <textarea [(ngModel)]="description" rows="3" placeholder="Detalhes do item"></textarea>
+          <label>Local</label>
+          <input [(ngModel)]="location" placeholder="Ex: Bloco A, Cantina" />
+          <label>Data</label>
+          <input [(ngModel)]="dateLost" type="date" [min]="minDate" [max]="today" />
+          <label>Foto do item</label>
+          <label class="file-label">
+            {{ selectedFileName || 'Escolher foto...' }}
+            <input type="file" hidden (change)="selectFile($event)" />
+          </label>
+          <div *ngIf="message" class="alert">{{ message }}</div>
+          <button class="button-primary full" (click)="submit()">Cadastrar item</button>
+        </ng-container>
+
+        <ng-container *ngIf="editingId">
+          <label>Título</label>
+          <input [(ngModel)]="editTitle" placeholder="Ex: Carteira preta" />
+          <label>Descrição</label>
+          <textarea [(ngModel)]="editDescription" rows="3" placeholder="Detalhes do item"></textarea>
+          <label>Local</label>
+          <input [(ngModel)]="editLocation" placeholder="Ex: Bloco A, Cantina" />
+          <label>Data</label>
+          <input [(ngModel)]="editDateLost" type="date" [min]="minDate" [max]="today" />
+          <label>Foto (opcional)</label>
+          <label class="file-label">
+            {{ selectedEditFileName || 'Escolher foto...' }}
+            <input type="file" hidden (change)="selectEditFile($event)" />
+          </label>
+          <div *ngIf="message" class="alert">{{ message }}</div>
+          <div class="row-actions">
+            <button class="button-primary" (click)="updateItem()">Salvar</button>
+            <button class="button-secondary" (click)="cancelEdit()">Cancelar</button>
+          </div>
+        </ng-container>
+      </aside>
+
+      <!-- Lista -->
+      <div class="list-area">
+        <div class="list-header">
+          <div>
+            <h2>Postagens</h2>
+            <p class="list-sub">{{ items.length }} {{ items.length === 1 ? 'item registrado' : 'itens registrados' }}</p>
+          </div>
+          <button class="button-primary compact" (click)="toggleItemForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            {{ showItemForm && !editingId ? 'Fechar formulário' : 'Novo item' }}
+          </button>
+        </div>
+
+        <div *ngIf="items.length === 0" class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>Nenhum item cadastrado ainda.</p>
+          <button class="button-primary compact" (click)="toggleItemForm()">Cadastrar primeiro item</button>
+        </div>
+
+        <div class="items-list">
+          <div *ngFor="let item of items" class="item-row" [class.editing]="editingId === item.id">
+            <img
+              [src]="item.image_url ? 'http://localhost:3000' + item.image_url : 'https://placehold.co/160x120?text=Sem+foto'"
+              alt="Imagem do item"
+              (error)="$any($event.target).src='https://placehold.co/160x120?text=Sem+foto'"
+              class="item-thumb"
+            />
+            <div class="item-info">
+              <div class="item-meta-row">
+                <span class="badge" [ngClass]="item.studentMatricula ? 'badge-lost' : 'badge-found'">
+                  {{ item.studentMatricula ? 'Perdido' : 'Achado' }}
+                </span>
+                <span *ngIf="item.studentMatricula" class="origin-tag">Aluno · {{ item.studentMatricula }}</span>
+                <span class="item-date">{{ item.date_lost | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <h4 class="item-title">{{ item.title }}</h4>
+              <p class="item-desc">{{ item.description }}</p>
+              <p *ngIf="item.location" class="item-location">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ item.location }}
+              </p>
+            </div>
+            <div class="item-actions">
+              <button class="btn-action btn-edit" (click)="startEdit(item)" title="Editar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+              </button>
+              <button class="btn-action btn-delete" (click)="deleteItem(item.id)" title="Excluir">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VIEW: Alunos -->
+  <div *ngIf="currentView === 'students'" class="view-section">
+
+    <div class="content-layout" [class.has-form]="showStudentForm">
+
+      <!-- Formulário -->
+      <aside *ngIf="showStudentForm" class="form-panel">
+        <div class="panel-header">
+          <h3>{{ editingStudentMatricula ? 'Editar aluno' : 'Novo aluno' }}</h3>
+          <button class="btn-close" (click)="toggleStudentForm()" title="Fechar">✕</button>
+        </div>
+
+        <label>Matrícula</label>
+        <input [ngModel]="studentMatricula" (ngModelChange)="onStudentMatriculaChange($event)" placeholder="Ex: 1234567" [disabled]="editingStudentMatricula !== null" />
+        <label>Email</label>
+        <input [(ngModel)]="studentEmail" placeholder="Email do aluno" />
+        <label>Curso</label>
+        <input [(ngModel)]="studentCourse" placeholder="Curso" />
+        <label>Telefone</label>
+        <input [ngModel]="studentPhone" (ngModelChange)="onStudentPhoneChange($event)" placeholder="DDD + 9 dígitos" />
+        <label>Senha</label>
+        <input [(ngModel)]="studentPassword" type="password" placeholder="Senha do aluno" />
+        <small *ngIf="editingStudentMatricula" class="hint">Deixe em branco para manter a senha atual.</small>
+        <div *ngIf="studentMessage" class="alert">{{ studentMessage }}</div>
+        <div class="row-actions">
+          <button class="button-primary" (click)="saveStudent()">{{ editingStudentMatricula ? 'Salvar' : 'Cadastrar' }}</button>
+          <button class="button-secondary" *ngIf="editingStudentMatricula" (click)="clearStudentForm()">Cancelar</button>
+        </div>
+      </aside>
+
+      <!-- Lista -->
+      <div class="list-area">
+        <div class="list-header">
+          <div>
+            <h2>Alunos</h2>
+            <p class="list-sub">{{ students.length }} {{ students.length === 1 ? 'aluno cadastrado' : 'alunos cadastrados' }}</p>
+          </div>
+          <button class="button-primary compact" (click)="toggleStudentForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            {{ showStudentForm ? 'Fechar formulário' : 'Novo aluno' }}
+          </button>
+        </div>
+
+        <div *ngIf="students.length === 0" class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <p>Nenhum aluno cadastrado.</p>
+          <button class="button-primary compact" (click)="toggleStudentForm()">Cadastrar primeiro aluno</button>
+        </div>
+
+        <div class="items-list">
+          <div *ngFor="let student of students" class="item-row student-row">
+            <div class="student-avatar">{{ student.email.charAt(0).toUpperCase() }}</div>
+            <div class="item-info">
+              <div class="item-meta-row">
+                <span class="badge badge-student">Matrícula {{ student.matricula }}</span>
+                <span class="item-date">{{ student.course }}</span>
+              </div>
+              <h4 class="item-title">{{ student.email }}</h4>
+              <p class="item-desc">{{ student.phone }}</p>
+            </div>
+            <div class="item-actions">
+              <button class="btn-action btn-edit" (click)="editStudent(student)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+              </button>
+              <button class="btn-action btn-delete" (click)="deleteStudent(student.matricula)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,193 @@
+<div class="dashboard-shell">
+
+  <!-- Topo -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <p class="eyebrow">Área do Aluno</p>
+      <h1>Meu painel</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-ghost" (click)="viewPublicItems()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Ver mural
+      </button>
+      <button class="btn-ghost btn-logout" (click)="logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'publish'" (click)="setActiveTab('publish')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Meus itens
+      <span class="tab-count">{{ myItems.length }}</span>
+    </button>
+  </div>
+
+  <!-- VIEW: Perfil -->
+  <div *ngIf="activeTab === 'profile'" class="view-section">
+    <div class="profile-layout">
+      <div class="form-panel">
+        <div class="panel-header">
+          <h3>Dados pessoais</h3>
+        </div>
+
+        <label>Email</label>
+        <input [(ngModel)]="studentEmail" placeholder="Email" />
+
+        <label>Matrícula</label>
+        <input [value]="studentMatricula" disabled title="Matrícula do aluno" class="input-disabled" />
+
+        <label>Curso</label>
+        <input [(ngModel)]="studentCourse" placeholder="Curso" />
+
+        <label>Telefone</label>
+        <input [ngModel]="studentPhone" (ngModelChange)="onPhoneChange($event)" placeholder="DDD + 9 dígitos" />
+
+        <div *ngIf="profileMessage" class="alert">{{ profileMessage }}</div>
+
+        <button class="button-primary full" (click)="saveProfile()">Salvar perfil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW: Meus itens -->
+  <div *ngIf="activeTab === 'publish'" class="view-section">
+    <div class="content-layout" [class.has-form]="showPublishForm || editingItemId !== null">
+
+      <!-- Formulário lateral -->
+      <aside *ngIf="showPublishForm && editingItemId === null" class="form-panel">
+        <div class="panel-header">
+          <h3>Publicar item</h3>
+          <button class="btn-close" (click)="showPublishForm = false" title="Fechar">✕</button>
+        </div>
+
+        <label>Título do item</label>
+        <input [(ngModel)]="title" placeholder="Ex: Carteira preta, Óculos, Chave" />
+
+        <label>Descrição</label>
+        <textarea [(ngModel)]="description" rows="3" placeholder="Descreva o item com detalhes"></textarea>
+
+        <label>Status</label>
+        <select [(ngModel)]="status" title="Status do item">
+          <option value="Perdido">Perdido</option>
+          <option value="Achado">Achado</option>
+        </select>
+
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="showLocation" />
+          <span>Sei onde {{ status === 'Achado' ? 'foi encontrado' : 'perdi' }} 📍</span>
+        </label>
+        <div *ngIf="showLocation" class="optional-field">
+          <input [(ngModel)]="location" placeholder="Ex: Bloco A, Biblioteca, Cantina" />
+        </div>
+
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="showDate" />
+          <span>Sei quando aconteceu 📅</span>
+        </label>
+        <div *ngIf="showDate" class="optional-field">
+          <input [(ngModel)]="dateLost" type="date" [min]="minDate" [max]="today" />
+        </div>
+
+        <label>Foto (opcional)</label>
+        <label class="file-label">
+          {{ selectedFileName || 'Escolher foto...' }}
+          <input type="file" accept="image/*" hidden (change)="selectFile($event)" />
+        </label>
+
+        <div *ngIf="message" class="alert">{{ message }}</div>
+        <button class="button-primary full" (click)="submit()">Publicar no mural</button>
+      </aside>
+
+      <!-- Formulário de edição lateral -->
+      <aside *ngIf="editingItemId !== null" class="form-panel">
+        <div class="panel-header">
+          <h3>Editar item</h3>
+          <button class="btn-close" (click)="cancelEditItem()" title="Fechar">✕</button>
+        </div>
+
+        <label>Descrição</label>
+        <textarea [(ngModel)]="editDescription" rows="3" placeholder="Atualize a descrição"></textarea>
+
+        <label>Status</label>
+        <select [(ngModel)]="editStatus" title="Status da publicação">
+          <option value="Perdido">Perdido</option>
+          <option value="Achado">Achado</option>
+        </select>
+
+        <label>Nova foto (opcional)</label>
+        <label class="file-label">
+          {{ selectedEditFileName || 'Escolher foto...' }}
+          <input type="file" accept="image/*" hidden (change)="selectEditFile($event)" />
+        </label>
+
+        <div *ngIf="myItemsMessage" class="alert">{{ myItemsMessage }}</div>
+        <div class="row-actions">
+          <button class="button-primary" (click)="saveItemEdit()">Salvar</button>
+          <button class="button-secondary" (click)="cancelEditItem()">Cancelar</button>
+        </div>
+      </aside>
+
+      <!-- Lista -->
+      <div class="list-area">
+        <div class="list-header">
+          <div>
+            <h2>Meus itens</h2>
+            <p class="list-sub">{{ myItems.length }} {{ myItems.length === 1 ? 'item publicado' : 'itens publicados' }}</p>
+          </div>
+          <button class="button-primary compact" (click)="showPublishForm = !showPublishForm; editingItemId = null">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            {{ showPublishForm && editingItemId === null ? 'Fechar formulário' : 'Publicar item' }}
+          </button>
+        </div>
+
+        <div *ngIf="myItems.length === 0" class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>Você ainda não publicou nenhum item.</p>
+          <button class="button-primary compact" (click)="showPublishForm = true">Publicar primeiro item</button>
+        </div>
+
+        <div class="items-list">
+          <div *ngFor="let item of myItems" class="item-row" [class.editing]="editingItemId === item.id">
+            <img
+              [src]="item.image_url ? 'http://localhost:3000' + item.image_url : 'https://placehold.co/160x120?text=Sem+foto'"
+              alt="Imagem do item"
+              (error)="$any($event.target).src='https://placehold.co/160x120?text=Sem+foto'"
+              class="item-thumb"
+            />
+            <div class="item-info">
+              <div class="item-meta-row">
+                <span class="badge" [ngClass]="item.status === 'Perdido' ? 'badge-lost' : 'badge-found'">
+                  {{ item.status || 'Perdido' }}
+                </span>
+                <span class="item-date">{{ item.created_at | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <h4 class="item-title">{{ item.title || 'Item sem título' }}</h4>
+              <p class="item-desc">{{ item.description }}</p>
+            </div>
+            <div class="item-actions">
+              <button class="btn-action btn-edit" (click)="startEditItem(item); showPublishForm = false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar
+              </button>
+              <button class="btn-action btn-delete" (click)="deleteItem(item.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
